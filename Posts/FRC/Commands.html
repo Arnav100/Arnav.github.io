@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Personal Blog</title>
+
+    <!--
+    <link rel="shortcut icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-5"">
+            <h1 class=" py-3 title">Commands Package</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5">
+                <h3>Purpose</h3>
+                <p class="info lead">
+                    To have the Robot perform actions, we create commands using the subsystems 
+                    and sensors we have created. Each command extends the FRC created 
+                    abstract class, Command. The necessary methods to override are: 
+                    <code>initialize() execute() isFinished() end() interrupted()</code> and the 
+                    constructor is also important. Most commands are simple, I will walk through how
+                    to make an Intake command.
+                </p>
+                <h3 class = "mt-5">Constructor</h3>
+                <p class = "info lead">
+                    The constructor of a command is like any other constructor for a class, 
+                    it should take in any necessary infomation for the command to run (E.X.
+                    amount of time to run). But, an important part of the constructor for commands
+                    is that it should call the method requires() method which intakes a subsystem that
+                    this command is going to use. Example: <br><br>
+                    <code>
+                        private double runTime; <br>
+                        public Intake(double runTime) { <br>
+                        &nbsp&nbsp&nbsp&nbsp this.runTime = runTime;<br>
+                        &nbsp&nbsp&nbsp&nbsp requires(Robot.gripper);<br>
+                        }
+                    </code>
+                </p>
+                <h3 class="mt-5">initialize()</h3>
+                <p class = "info lead">
+                    The initialize method only runs once and should set any sensors or
+                    robot state info to the values they should be at the start of the method. 
+                    Example: <br><br>
+                    <code>
+                        @Override <br>
+                        protected void initialize() { <br>
+                        &nbsp&nbsp&nbsp&nbsp Robot.isIntaking = true; <br>
+                        }
+                    </code>
+                </p>
+                <h3 class="mt-5">execute()</h3>
+                <p class = "info lead">
+                    The execute method runs repeatedly with the robot, every 20 milliseconds 
+                    to be precise, and should contain the code for what the robot should be doing,
+                    using the methods we write for that subsystem. Example: <br><br>
+                    <code>
+                        @Override <br>
+                        protected void execute() { <br>
+                        &nbsp&nbsp&nbsp&nbsp Robot.gripper.intake(); <br>
+                        }
+                    </code>
+                </p>
+                <h3 class="mt-5">isFinished()</h3>
+                <p class = "info lead">
+                    The isFinished method also runs repeatedly and returns a boolean, true if 
+                    the command should stop, false otherwise. Commands which are supposed to 
+                    run while a button is held down, should return false so that they continue. 
+                    Autonomous commands and commands which are expected to run after a click of a button
+                    should return some kind of boolean which changes based of time or a sensor. If a command
+                    is meant to only run once, it should isFinished should simply return true. In this intake 
+                    command, it should finish when either the runTime is complete or perhaps when a limitswitch 
+                    tells us the gripper has a ball. The method <code>timeSinceInitalized()</code> is a built in method 
+                    in the Command class which returns how long it has been since the initalize() method was called.
+                    Example: <br><br>
+                    <code>
+                                            @Override <br>
+                                            protected boolean isFinished() { <br>
+                                            &nbsp&nbsp&nbsp&nbsp return timeSinceInitalized() > this.runTime || Robot.limitSwitches.isBallIn(); <br>
+                                            }
+                    </code>
+                </p>
+                <h3 class="mt-5">end()</h3>
+                <p class = "info lead">
+                    The end method runs once and is called directly after isFinished() returns false. 
+                    This method should do whats needed to stop the command, such as stopping
+                    motors or subsystems, and change any needed Robot states. Example: <br><br>
+                    <code>
+                        @Override <br>
+                        protected void end() { <br>
+                        &nbsp&nbsp&nbsp&nbsp Robot.gripper.stop(); <br>
+                        &nbsp&nbsp&nbsp&nbsp Robot.isIntaking = false; <br>
+                        }
+                    </code>
+                </p>
+                <h3 class="mt-5">interrupted()</h3>
+                <p class="info lead">
+                    The interrupted method runs if cancel() is called on the command or
+                    another command is called which requires the same subsystem as the current.
+                    The code for this method should be the exact same for every single command of ours,
+                    it should simply call end(). Example: <br><br>
+                    <code>
+                        @Override <br>
+                        protected void interrupted() { <br>
+                        &nbsp&nbsp&nbsp&nbsp end(); <br>
+                        }
+                    </code>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <script src="/main.js"></script>
+</body>
+
+</html>

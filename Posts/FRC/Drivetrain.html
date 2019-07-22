@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Personal Blog</title>
+
+    <!--
+    <link rel="shortcut icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-5">
+            <h1 class=" py-3 title">DriveTrain Subsystem</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-12 mt-5">
+                <h3>Background</h3>
+                <div class = "row">
+                    <div class = "col-md-8">
+                    <p class="info lead">
+                        All FRC robots require a drivetrain in order to move around. The three most popular
+                        types of robot drivetrain designs are tank, swerve, and mecanum. My team has repeatedly usen 
+                        tank drive with two arcade joysticks. I will go through the code on how to write the most
+                        basic of this subsystem and its uses. There are more unique things that can be done with 
+                        the drivetrain and I have not gone over the Autonomous commands which can be made. 
+                    </p>
+                    </div>
+                    <div class = "col">
+                        <img class="img-fluid" src="images/DriveTrain.png">
+                    </div>
+                </div>
+                <h3 class="mt-5">RobotMap</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="info lead">
+                            As with all motors and sensors, the drive motors should be instantiated as static 
+                            variables of RobotMap. The WPI_TalonSRX class used to program the motors has to be 
+                            imported seperatley and each ID has to be set in the talon tuner, instructions for this
+                            can be found in my description of <a href = "RobotMap.html">RobotMap</a>. Each ID should
+                            be stored as a constant within the Constants class. 
+                            If using more than one motor on each side (which is very likely) 
+                            a SpeedControllerGroup object is needed for each side as well. Then you can finally 
+                            make a DifferentialDrive object which will be used in our DriveTrain class.<br><br> Note: Each 
+                            WPI_TalonSRX drive motor should be tested indvidually (In teleopPeriodic: Robot.motor.set(0.1))
+                            to determine whether it is driving forward when given a positive value. Motors on right side of 
+                            the robot should be driving backwards when given a postive value because the DifferentialDrive
+                            class reverses right side motors. Orientation can be reversed by .setInverted(true);
+                        </p>
+                    </div>
+                    <div class="col">
+                        <p class = "lead">
+                            <code class = "bigCode">
+                                public static WPI_TalonSRX lFrontDrive; <br>
+                                public static WPI_TalonSRX lBackDrive; <br>
+                                public static WPI_TalonSRX rFrontDrive; <br>
+                                public static WPI_TalonSRX rBackDrive; <br><br>
+
+                                public static SpeedControllerGroup leftSide; <br>
+                                public static SpeedControllerGroup rightSide; <br><br>
+                            
+                                public static DifferentialDrive driveBase; <br>
+                                public static void init() { <br>
+                                lFrontDrive = new WPI_TalonSRX(Constants.LEFT_FRONT_DRIVE_ID); <br>
+                                lBackDrive = new WPI_TalonSRX(Constants.LEFT_BACK_DRIVE_ID); <br>
+                                rFrontDrive = new WPI_TalonSRX(Constants.RIGHT_FRONT_DRIVE_ID); <br>
+                                rBackDrive = new WPI_TalonSRX(Constants.RIGHT_BACK_DRIVE_ID); <br><br>
+                                //Adjust Accordingly <br>
+                                lFrontDrive.isInverted(false); <br>
+                                lBackDrive.isInverted(false); <br>
+                                rFrontDrive.isInverted(true); <br>
+                                rBackDrive.isInverted(true) <br><br>
+
+                                leftSide = new SpeedControllerGroup(lFrontDrive, lBackDrive); <br>
+                                rightSide = new SpeedControllerGroup(rFrontDrive, rBackDrive); <br><br>
+
+                                driveBase = new DifferentialDrive(leftSide, rightSide);<br>
+                                }
+                            </code>
+                        </p>
+                    </div>
+                </div>
+                <h3 class="mt-5">DriveTrain</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="info lead">
+                            In this class which will be used to Control the robot's movement. The most basic 
+                            version of this class will have the methods 
+                            <code>initDefaultCommand() move(double left, double right) drive() stop()</code>.
+                            More methods for PID movement and other things can also be added. In the 2019 season, 
+                            I developed a speed movement system in which the drivetrain speed follows a sigmoid curve
+                            to allow for smooth movements, I will share and explain this code in a future post. 
+                        </p>
+                    </div>
+                    <div class="col">
+                        <p class="lead">
+                            <code class="bigCode">
+                                public class DriveTrain extends Subsystem { <br><br>
+                                @Override <br>
+                                public void initDefaultCommand() { <br>
+                                &nbsp&nbsp&nbsp&nbsp //This Command will be explained below on this page <br>
+                                &nbsp&nbsp&nbsp&nbsp setDefaultCommand(new TankDrive());<br>
+                                } <br><br>
+                                public void move(double left, double right) { <br>
+                                &nbsp&nbsp&nbsp&nbsp RobotMap.driveTank.tankDrive(left, right);<br>
+                                } <br><br>
+                                public void tankDrive() { <br>
+                                &nbsp&nbsp&nbsp&nbsp double left = Robot.oi.j0.getY(); <br>
+                                &nbsp&nbsp&nbsp&nbsp double right = Robot.oi.j1.getY();<br>
+                                &nbsp&nbsp&nbsp&nbsp move(left, right); <br>
+                                } <br><br>
+                                public void stop() {<br>
+                                &nbsp&nbsp&nbsp&nbsp RobotMap.driveTank.stopMotor();<br>
+                                }<br><br>
+                            }
+
+                            </code>
+                        </p>
+                    </div>
+                </div>
+                <h3 class="mt-5">Robot</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="info lead">
+                           Same as all Subsystem and Sensor classes we make, they each should be instantiated as static 
+                           variables in the Robot class. This is how DriveTrain is instantiated as well. 
+                        </p>
+                    </div>
+                    <div class="col">
+                        <p class="lead">
+                            <code class="bigCode">
+                                public class Robot extends TimedRobot { <br><br>
+                                public static OI oi; <br>
+                                public static DriveTrain driveTrain;<br><br>
+                                @Override<br>
+                                public void robotInit() {<br>
+                                &nbsp&nbsp&nbsp&nbsp RobotMap.init(); <br>
+                                &nbsp&nbsp&nbsp&nbsp driveTrain = new DriveTrain();<br>
+                                &nbsp&nbsp&nbsp&nbsp //OI gets instantiated LAST! <br>
+                                &nbsp&nbsp&nbsp&nbsp oi = new OI(); <br>
+                                } <br>
+                                /* More Code */ <br>
+                            }
+
+                            </code>
+                        </p>
+                    </div>
+                </div>
+                <h3 class="mt-5">Drive Command</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="info lead">
+                            This is the command which allows for human control over the drivetrain movement since
+                            it will get called over and over as the defualt command of the DriveTrain 
+                            class. For detailed info on how Commmand classes work, go to the <a href = "Commands.html">Command Post</a>.
+
+                        </p>
+                    </div>
+                    <div class="col">
+                        <p class="lead">
+                            <code class="bigCode">
+                            public class Drive extends Command {<br><br>
+
+                            public Drive() { <br>
+                            &nbsp&nbsp&nbsp&nbsp requires(Robot.driveTrain);<br>
+                            }<br><br>
+                            
+                            @Override<br>
+                            protected void initialize() {<br>
+                            }<br><br>
+                            
+                            @Override<br>
+                            protected void execute() {<br>
+                            &nbsp&nbsp&nbsp&nbsp Robot.driveTrain.tankDrive();<br>
+                            }<br><br>
+                            
+                            @Override<br>
+                            protected boolean isFinished() {<br>
+                            &nbsp&nbsp&nbsp&nbsp return false;<br>
+                            }<br><br>
+                            
+                            @Override<br>
+                            protected void end() {<br>
+                            &nbsp&nbsp&nbsp&nbsp Robot.driveTrain.stop();<br>
+                            }<br>
+                            
+                            protected void interrupted() {<br>
+                            &nbsp&nbsp&nbsp&nbsp end();<br>
+                            }<br><br>
+                        }
+                            </code>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <script src="/main.js"></script>
+</body>
+
+</html>

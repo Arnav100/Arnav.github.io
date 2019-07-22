@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Personal Blog</title>
+
+    <!--
+    <link rel="shortcut icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-4"">
+            <h1 class=" py-3 title">Thesis Day 2</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5 ">
+                <h3>Previous Work</h3>
+                <p class="info lead">
+                    Previously, I had confirmed that the Lidar sensor does work and provides accurate
+                    readings. I have also been able to properly wire an arduino to my team's Jonbot. 
+                    The plan for today was to have data be sent and recieved from both Jonbot and the arduino.
+                </p>
+                <h3 class="mt-5">Programming</h3>
+                    <p class="info lead">
+                        After doing some research, I determined that the best way to have communications between
+                        the two devices would be to use the Arduino Wire library for the Arduino and to use the
+                        FRC I2C class on Jonbot.
+                    </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4 class = "text-center">
+                            Jonbot Reading Code
+                        </h4>
+                        <p class = "info lead bigCode">
+                            <br>
+                            <code>
+                                //Inside TeleopPeriodic<br>
+                                int READ_SIZE = 32; <br>
+                                byte[] read = new byte[READ_SIZE];//create a byte array to hold the incoming data <br>
+                                RobotMap.arduino.read(4, read.length, read);//use address 4 on i2c and store it in data <br>
+                                String arduinoMessage = new String(read);//create a string from the byte array <br>
+                                int stop = arduinoMessage.indexOf(""+ (char)255); <br> //Finds ending of message 
+                                arduinoMessage = arduinoMessage.substring(0, stop < 0 ? arduinoMessage.length() : stop);<br> //Stops the message where needed
+                                 System.out.println("Data: " + arduinoMessage); <br>
+                                
+                            </code>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 class="text-center">
+                            Jonbot Writing Code
+                        </h4>
+                        <div class="info lead bigCode">
+                            <br>
+                            <code>
+
+                                String messageToArduino = "Hello Arduino"; <br>
+                                byte[] messageArray = new byte[messageToArduino.length()]; <br>
+                                for (int i = 0; i < messageArray.length; i++)  <br>
+                                <div class="tab">
+                                    Array[i]=(byte) messageToArduino.charAt(i); <br>
+                                </div>
+                                RobotMap.arduino.writeBulk(messageArray, messageArray.length);
+
+                            </code>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row mt-5">
+                    <div class = "col-md-12">
+                        <h4 class="text-center">
+                            Arduino Setup
+                        </h4>
+                        <div class="info lead bigCode">
+                            <br>
+                            <code>
+                            void setup() { <br>
+                                <div class = "tab">
+                                Wire.begin(4); // join i2c bus with address #4 <br>
+                                Serial.begin(9600);<br>
+                                Wire.onReceive(receiveEvent); // Method to run when Jonbot sends a message <br>
+                                Wire.onRequest(requestEvent); // Method to run when Jonbot asks for a message<br>
+                                Serial.println("Starting");<br>
+                                </div>
+                            } <br> <br>
+                            </code>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 class="text-center">
+                            Arduino Reading Code
+                        </h4>
+                        <div class="info lead bigCode">
+                            <br>
+                            <code>
+                            void receiveEvent(int n) { <br>
+                            <div class = "tab">
+                                Serial.println("Recieve Called"); <br>
+                                String message = ""; <br>
+                                Serial.print("Message from Jonbot: ") <br>
+                                while(Wire.available()) { <br>
+                                <div class = "tab">
+                                    char c = Wire.read(); <br>
+                                    Serial.print(c);<br>
+                                </div>
+                                } <br>
+                            </div>
+                            }
+                            </code>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 class="text-center">
+                            Arduino Writing Code
+                        </h4>
+                        <div class="info lead bigCode">
+                            <br>
+                            <code>
+                                void requestEvent() { <br>
+                                    <div class = "tab">
+                                        Wire.write("How are you Jonbot?"); <br>
+                                    </div>
+                                } <br>
+                            </code>
+                        </div>
+                    </div>
+                </div>
+                <p class="info lead">
+                    After some research I was able to write the above code for both devices. I was sucessfully able
+                    to have "Hello Arduino" appear on the serial monitor for the arduino and "How are you Jonbot?"
+                    on the drivestation terminal. To test whether I could change the method which the
+                    Arduino runs depending on the message which Jonbot sends, I simply replaced the Arduino 
+                    reading code with the following: <br>
+                    <code class = "bigCode">
+                        char c = Wire.read(); <br>
+                        Serial.print(c);<br>
+                        if(c == 'A')<br>
+                        &nbsp&nbsp&nbsp&nbsp Wire.onRequest(secondRequestEvent); <br> <br>
+                    </code> 
+                    And then had secondRequestEvent() send a different message. The code worked,
+                    when Jonbot sent the char 'A' it would call the secondRequestEvent, and if he did not send
+                    it, it would continue sending the original message. 
+                </p>
+                <h3 class="mt-5">Adjusting the Lidar Code</h3>
+                <div class="info lead">
+                    After I confirmed I was able to send messages between the two devices and 
+                    change what was sent, I decided to adjust the Lidar code, so that the lidar 
+                    would report a scan when Jonbot told it too. The example code that came with
+                    the Sweep library initiated a scan when the user typed in "start". To have it
+                    begin a scan when Jonbot wanted, I first added the same arduino setup code written above
+                    to the setup method in this code. I set the Wire.onReceive() input to the listenForUserInput 
+                    method and commented out the Wire.onRequest() line for the time being. I then 
+                    rewrote the listenForUserInput method to the following:<br>
+                    <code class = "bigCode">
+                        void listenForUserInput(int n){<br>
+                        <div class = "tab">
+                            int robotMessage = Wire.read();<br>
+                            if(robotMessage == 1 && currentState == STATE_WAIT_FOR_USER_INPUT){<br>
+                                <div class = "tab">
+                                Serial.println("Going to adjust settings");<br>
+                                currentState = STATE_ADJUST_DEVICE_SETTINGS;<br>
+                                </div>
+                            }<br>
+                        </div>
+                        }<br><br>
+                    </code>
+                    In the Jonbot's code, I added a command which sent an int value of 1 to the Arduino
+                    in the execute method and had isFinished() return true, so that it would run once. I 
+                    then had the command run .whenPressed() for a joystick trigger. The code worked, when I would
+                    click the trigger, the arduino would go through the same process as if I had typed "start" and 
+                    would collect and print three scans of the environment with the lidar. 
+                </div>
+    
+                <h3 class="mt-5">Future Work</h3>
+                <p class="info lead">
+                    Being able to run scans after recieving messages from the robot was only the first step. Next 
+                    time I work with the robot I hope to be able to send the data collected in the scans to Jonbot.
+                    After doing so, I will optimize the arduino side code wherever possible and then attempt to launch
+                    a gui on the driverstation. I have been working on the code for this gui seperatley, and will write about
+                    that soon. 
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <script src="/main.js"></script>
+</body>
+
+</html>

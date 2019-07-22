@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Personal Blog</title>
+
+    <!--
+    <link rel="shortcut icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-4"">
+            <h1 class=" py-3 title">OI Class</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5">
+                <h3>Purpose</h3>
+                <p class="info lead">
+                   OI stands for Operator Interface and it is used to assign commands to 
+                   their desired buttons on joysticks. Just about any kind of joystick can be used, 
+                   from arcade joysticks to Xbox controllers to guitar hero controllers. Each Joystick 
+                   should be an instance variable in the OI class and instantiated within the constructor. 
+                   This should also be done with JoystickButton variables, but to make life easier for ourselves,
+                   we create our own JoystickController class that contains all possible buttons for the 
+                   joysticks.  
+                </p>
+                <h3 class="mt-5">JoystickController Class</h3>
+                <p class="info lead">
+                    We generally use 3 Arcade style joysticks with 12 buttons to control our robot, so rather than
+                    remembering to instantiate each button in OI, we do so in a seperate class. This class
+                    extends Joystick to inherit all its properties. The constructor has the
+                    int value of the port the joystick is plugged into as a parameter and 
+                    calls the super constructor with that value. 
+                    Each button (labeled b1, b2, b3,...) is a public instance variable and each is instantiated 
+                    in the constructor. ( <code>b1 = new JoystickButton(this, 1);</code>). By having this class,
+                    we can then simply instantiate an instance of a joystick controller and call any of the button
+                    instance variables when we want to set a command. A class like this can be created for 
+                    any type of joystick, such as an Xbox controller, and the buttons can be labeled accordingly. 
+                    These joystick classes should be located within the util package of the code. 
+                </p>
+                <h3 class="mt-5">Setting Commands</h3>
+                <p class="info lead">
+                    There are three ways to call a robot command with a button, whenPressed(), whenReleased(), and whileHeld(). 
+                    Each method takes in a command as a parameter, and calls the command in the way that the name
+                    of the method implies. Example:<code> j1.b1.whileHeld(new Outtake());</code> For a command meant
+                    to run in a whileHeld() method, the isFinished() of that command should return false. 
+                </p>
+                <h3 class="mt-5">DoubleButton Class</h3>
+                <p class="info lead">
+                    There may be some robot functionality that can be dangerous to trigger if called 
+                    by an accidental button push. For example, for our 2019 robot, Dr. Julius StrangePork,
+                    his endgame climb was a fully programmed series of motions that the drivers would simply 
+                    call by clicking a button. We of course did not want this to get called by mistake, so we
+                    made it so that pushing two buttons at the same time was requried for the Command to get called. 
+                    This is done by creating a seperate class named DoubleButton which extends the Button class
+                    and then having two buttons as parameters within the constructor, which get assigned to two
+                    button instance variables. Then the get() button is override to return the get() values of each
+                    of the two buttons: 
+                    <br>
+                    <code>
+                            public boolean get() 
+                            {
+                                <br>
+                                &nbsp&nbsp&nbsp&nbspreturn b1.get() && b2.get();
+                                <br>
+                            }
+                            <br>
+                    </code>
+                    Now in OI, you can create DoubleButtons and use them the same way as a
+                    normal button. This technique can be used to create different classes which take
+                    more into account in the get() method, such as third button or a robot state, but 
+                    two buttons is the most we have had to use up till now. 
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <script src="/main.js"></script>
+</body>
+
+</html>

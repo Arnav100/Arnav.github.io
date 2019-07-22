@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Personal Blog</title>
+
+    <!--
+    <link rel="shortcut icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-4"">
+            <h1 class=" py-3 title">Thesis Day 3</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5 ">
+                <h3>Previous Work</h3>
+                <p class="info lead">
+                    At this point, I have been able to retrieve readings from the Lidar on the Arduino, and have
+                    the Arduino and Jonbot communicate. I plan to today send over the Lidar sensor readings
+                    from the Arduino to Jonbot.
+                </p>
+                <h3 class="mt-5">Attempts</h3>
+                <p class = " border pl-3">
+                    Note: All code written today was for testing purposes, there is a lot of clean up that can be 
+                    done, I plan to do all that soon. 
+                </p>
+                <p class="info lead">
+                    My goal was to first send one full sensor reading at a time to Jonbot. I was able to 
+                    start the scan easily with a push of trigger, causing the roborio to send a signal to the Arduino
+                    which would then begin a scan, code which I wrote when I last worked with the devices. Currently,
+                    this process of collecting a scan would include having set the speed of the sensor and confirming 
+                    the correct speed, before actually beginning the scan. I knew I could remove this later, so that it would be
+                    done in the setup() method in the arduino code, but I did not want to right now, because I wanted
+                    to eliminate the variable of me interferring with correct code from being a factor in 
+                    something not working. With or without this speed confirmation, the I could not use 
+                    the I2C transaction() method to send the start message and recieve the response, because the
+                    response would take longer on the Arduino side. So instead, I created a command which in the
+                    execute() method would call the I2C read() method and would continuously run the command because 
+                    I made an Arduino subsystem in Jonbot's code, with the read command as the default command. I 
+                    made the communication between the Arduino and Jonbot so that if the first
+                    value of the byte[] the read command recieved was less than 0, this would mean the Arduino had 
+                    not collected the reading yet, and the read command would do nothing. 
+                </p>
+                <p class = "info lead">
+                    For the Arduino code of sending the reading data, my first attempt was to edit the printCollectedData()
+                    method so that it would be onRequest() method to send data to Jonbot. The program was written to have states
+                    in order to determine which method should be running, so since the onRequest() method would get called over and 
+                    over again (since the read command in Jonbot would be currently calling it continuously), I made it so that
+                    if the state was not STATE_REPORT_COLLECTED_DATA, then send a byte array only containing -1 to Jonbot. 
+                    I then adjusted the code so that it printed the angle, distance, and signal strength values each from their respective
+                    500 length byte arrays, it would store the values in a 1500 length byte array. Upon completion it would send that
+                    byte array to Jonbot. I wasn't sure whether an array of that length could be sent over and sure enough
+                    Jonbot's driverstation gave an error when I tried to enable it. I had never seen this error before and I wasn't sure
+                    whether it was unable to create the error in memory or if the I2C was able to send over an array of that length.
+                    I tried sending the array of angles of length 500 as a byte array from the arduino to Jonbot, but that gave the same error. 
+                    Through these trials I understood that the best procedure would be to send over each scan point as a byte array of length 3
+                    consisting of the angle, distance, and signal strength. 
+                </p>
+
+                <p class = "info lead">
+                    Knowing I should send the data in groups of three, I thought it maybe best to send it directly from the gatherSensorReading
+                    method, rather than the printCollectedData() method. So I switched the gather method to be called by the onRequest()
+                    and inserted the same if statement based on the state in the arduino code, as described in the previous paragraph. I then 
+                    added code to store the values in a length 3  byte array and then send to Jonbot. When I tested this, I saw that only a few 
+                    scan points were sent over (Thinking back, this could have possibly happened due to errors on my part,
+                    I will revist this when I clean up my code). Due to frustration, I decided to go about a slightly different
+                    approach of sending this data. 
+                </p>
+                <p class = "info lead"> 
+                    I decided to create a seperate method, sendToRobot(), which would serve as the method called by onRequest(). 
+                    It would use two global variables, a byte array of length 500 (not 1500 because I am only sending 
+                    1 scan rather than the three scans as in the default example code) and an int value of the last index of the 
+                    array sent. The byte array would get filled with the scan point values in the printCollectedData() method
+                    and would set the lastIndex variable to 0. Then the state of the arduino would change to my added state of 
+                    STATE_SEND_TO_ROBOT. During this state, the sendToRobot() method would send the a byte array of
+                    the next three values from the lastIndexSent value onwards to Jonbot (E.X. if lastIndexSent = 0, arduino would send
+                    values in indexes 0, 1, 2, corresponding to angle, distance, and strength ). The lastIndexSent value would then 
+                    get updated by having three added to it, and once it was greater than or equal to the value 500, the state of the
+                    arduino would then change. This worked! The values would get sent to the robot, and I stored an ArrayList of byte
+                    arrays and by creating a command, each scan point would get printed when I clicked a joystick button. Although, I
+                    realized that I had failed to remember by sending the values as scan point values as bytes
+                     --- when they were originally ints --- I was losing the true values of that info. I would have to deal with this issue
+                     next time I worked on the project.
+                </p>
+                <h3 class="mt-5">Future Work</h3>
+                <p class="info lead">
+                    I need to fix the loss of info from int to byte and I can do this by sending the info as Strings rather than bytes. 
+                    After applying this fix, I will need to see if I can have a gui to display the data on the driver station. Then 
+                    I can work to clean my arduino side code. After all this, I should have lidar readings being sent to Jonbot quickly 
+                    and I can then begin to write logic for the robot to follow a path based on what is far and what is close to it. I
+                    initially wanted the robot to have all the reading data and determine which direction it should turn so that I could also
+                    display the environment it sees in a gui, but I am considering having the arduino determining the direction for the robot 
+                    and then sending that to the robot instead. 
+                </p>
+               </div> 
+            </div>
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <!-- My JS Files-->
+    <script src="/main.js"></script>
+</body>
+
+</html>

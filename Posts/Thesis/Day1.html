@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Personal Blog</title>
+
+    <!--
+    <link rel="shortcut icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-4"">
+            <h1 class=" py-3 title">Thesis Day 1</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5">
+                <h3>Previous Work</h3>
+                <p class="info lead">
+                    This was my first day working with the Lidar Sensor. I wasn't sure whether or not
+                    the sensor would work because the company that made it went out of business. 
+                </p>
+                <h3 class="mt-5">Inital Testing</h3>
+                <div class = "row">
+                    <div class = "col-md-8">
+                        <p class="info lead">
+                            After going through online resources left behind by the Scanse Sweep lidar company, 
+                            I came across their <a href = "https://github.com/scanse/sweep-arduino">Github
+                            page </a> and followed the wire diagram to hook up the lidar to an Arduino Mega 2560. 
+                            I then downloaded the Arduino programming software and followed the Github instructions 
+                            to import the Sweep library. The lidar requires an external 5V power apart from the arduino,
+                            so for testing purposes I attached the usb cable that came with the lidar to my laptop.
+                            At this point, both the arduino and lidar were being powered by my laptop, but this was solely
+                            for inital testing. The arduino Sweep library came with sample code to run a scans. I was met
+                            with suceess as the lidar reported three scans of the environment on the Arudino monitor. 
+
+                        </p>
+                    </div>
+                    <div class = "col-md-4">
+                        <img class = "img-fluid" src = "images/MegaSerialPrinter.png">
+                    </div>
+                </div>
+                <p class = "info lead">
+                    The values reported to me were just numbers really, I was given the angle, distance, and signal
+                    strength, but I didn't have an proper way to confirm their accuracy.
+                    The Scanse Sweep lidar company had made a application to visual the readings of the Lidar on
+                    a map. Unfortunately, the download for the application was removed from their website. Yet,
+                    using <a href="http://web.archive.org/">The Wayback Machine</a> I was able to download
+                    it by going through an older version of their website.
+                </p>
+                <p class="info lead">
+                    The application displayed the lidar
+                    readings on a 2D grid, with the lidar at the sensor. From first glance, the map appeared to
+                    be a good model of the room. Using a piece of paper and a meter stick, I measured how accurate
+                    the readings were. At distances of less than a meter, the distance of the paper as reported by
+                    the lidar were somewhat inaccurate (The manual had noted this fact, I was just testing it), and
+                    past a meter, the lidar was accurate.
+                </p>
+                <h3 class="mt-5">Wiring to Robot</h3>
+                <div class = "row">
+                    <div class = "col-md-8">
+                    <p class="info lead">
+                        After confirming that the lidar works with the arduino and that I could program and adjust its behavior, 
+                        I knew the next step would be to have the arduino to communicate with a robot. My FRC Team, 
+                        4930 Electric Mayhem, has a spare robot, Jonbot, which just has a drivetrain and a vertical 
+                        electric board and is used for programming and electrical testing. After reading online on Reddit
+                        and Chief Delphi, I determined that the easiest way to wire and program the Arduino would be to hook
+                        it up the the Roborio's I2C port. I am not very proficient in wiring and did not want to proceed
+                        unguided in my attempts, fortunatley I was able to find <a>this blog</a> which gave excellent instructions
+                        on how to wire the arduino to the I2C port and provide it with power. Rather than solder the wires 
+                        to the arduino, I used wire connectors to connect the 18 guage wire from the Voltage Regulator Module
+                        to standard breadboard wire for the arduino. I turned on the robot and the arduino recieved power. 
+                    </p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <img class="img-fluid" src="images/Jonbot.jpg">
+                        <p>Jonbot (test robot)</p>
+                    </div>
+                </div>
+                <div class = "row text-center">
+                    <div class="col-md-6">
+                        <img class="img-fluid" src="images/wireConnection.jpg">
+                        <p>18 guage to breadboard wire connection </p>
+                    </div>
+                    <div class="col-md-6">
+                        <img class="img-fluid" src="images/arduinoLit.jpg">
+                        <p>Lit up Arduino</p>
+                    </div>
+                </div>
+                <h3 class = "mt-5">Future Work</h3>
+                <p class = "info lead">
+                    Now that the arduino and lidar are wired to Jonbot, I should be able to send and recieve data 
+                    between the roborio and arduino. I will write and test the code for this when I come to work 
+                    on the project again. Also, I want to be able to have a view of the robot's environment, as seen
+                    by the lidar, available on the driverstation screen. I won't be able to use the application
+                    provided by the company since it requires the lidar to be directly plugged in to the computer 
+                    running the application. I will try to make my own program using the java swing library to 
+                    display the data, although I will have to learn how to create a gui through the robot's code. 
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <script src="/main.js"></script>
+</body>
+
+</html>

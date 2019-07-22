@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Personal Blog</title>
+
+    <!--
+    <link rel="shortcut icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-4"">
+            <h1 class=" py-3 title">RobotMap Class</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5">
+                <h3>Purpose</h3>
+                <p class="info lead">
+                    Every Robot has lots of Talons, sensors, and other attachments, and each live
+                    somewhere in the body of the robot; in the code, these objects live in RobotMap. 
+                    Each device connected to the robot should be declared as a public static class 
+                    variable of RobotMap, and must be instantiated and settings configured within 
+                    the <code>init()</code> method. These objects will then be used to greater subsystem
+                    and sensor classes to control the robot.
+                </p>
+                <h3 class = "mt-5">WPI_TalonSRX</h3>
+                <p class="info lead">
+                    Talons are speed controllers each connected to a Robot's motor so that we can 
+                    program its movement. We rarely have used Victors, but if we do, the code for
+                    those is relatively the same. As of 2019, in order to program these Talons in 
+                    Visual Studio Code, you need to run the WPILib: Manage Vendor Libraries command,
+                    and install a new library online with this  
+                    <a href = "http://devsite.ctr-electronics.com/maven/release/com/ctre/phoenix/Phoenix-latest.json">link</a>.
+                    More info for the talon software and the talon tuner can be found  
+                    <a href = "http://www.ctr-electronics.com/talon-srx.html">here</a>. The tuner program is especially important
+                    because it is used to give each talon a specific numerical ID, which will then be used 
+                    in our code to instantiate the talon. Start each talon ID from 20 upwards, and whenever you change
+                    the name or ID of a talon in the tuner, perform a test blink to verify you changed what you were expecting. 
+                    Apart from instantiation, the configuration of each talon object involves reversing necessary 
+                    motors, setting slaves and masters, setting encoders, and reversing encoders. Each of these methods
+                    can be found in the CTRE Documentation. 
+                </p>
+                <h3 class = "mt-5">Pneumatics</h3>
+                <p class="info lead">
+                    The Pneumatics configuration is very simple and should be done in RobotMap. To
+                    make the compressor active and stop when necessary, simply instantiating it will
+                    allow it do that (Defualt ID is 50). Each solenoid should also be instantiated and
+                    put in the state that the robot should be in when it starts up.
+                </p>
+                <h3 class = "mt-5">Sensors</h3>
+                <p class="info lead">
+                    Sensors including but not limited to, gyros, ultasonics, limit switches and potentiometers
+                    should also be instantiated in init(). The NAVX library (Gyro sensor) needs to also be added
+                    the same way as the Talons, but with this  
+                    <a href = "https://www.kauailabs.com/dist/frc/2019/navx_frc.json">link</a> instead.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <script src="/main.js"></script>
+</body>
+
+</html>

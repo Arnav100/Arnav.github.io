@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Personal Blog</title>
+
+    <!--
+    <link rel="shortcut icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-4"">
+            <h1 class=" py-3 title">Sensor Package</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5">
+                <h3>Purpose</h3>
+                <p class="info lead">
+                    In order to understand to control the different states and locations
+                    of the robot as it goes through gameplay, we use sensors to monitor it. 
+                    The methods necessary to use the sensors will be provided by their libraries,
+                    but we make our own classes for them to better fit our needs. Like Subsystems, 
+                    each of these classes should be declared as static variables within the
+                    Robot class, and instantiated within RobotInit(). Sensors we have 
+                    used in the past include limitswitches, potentiometers, gyroscopes, ultrasonics, 
+                    and encoders
+                </p>
+                <h3 class = "mt-5">Limitswitches</h3>
+                <div class = "row">
+                    <div class = "col-md-8">
+                        <p class = "info lead">
+                            A limitswitch is basically a button. Its output will either be true or false,
+                            depending on whether or not it is pushed. We generally will have multiple 
+                            limitswitches on a robot (E.X. one to determine if a gripper has a ball and
+                            one to determine if robot arm is all the way down) and after making each sensor in 
+                            RobotMap, we can create a seperate LimitSwitch class in the sensors package which 
+                            has methods specific to the purpose to the limitswitches (E.X. isBallIn(), isArmDown()).
+                            This way we only need to call one object, an instance of our LimitSwitch class, to determine
+                            the states of the robot. 
+                        </p>
+                    </div>
+                    <div class = "col-md-4">
+                        <img class = "img-fluid"src = "images/limitswitch.png">
+                    </div>
+                </div>
+                <h3 class = "mt-5">NavX</h3>
+                <div class = "row">
+                    <div class = "col-md-8">
+                        <p class = "info lead">
+                            We use a sensor called the NavX which is basically a gyroscope. The library for
+                            this sensor needs to be added to the project (Instructions can be found in my description 
+                            of <a href = "RobotMap.html">RobotMap</a>). The given class for the sensor is called AHRS,
+                            but we create our own class called NavX using the AHRS object instantiated in RobotMap. 
+                            Depending on the orientation of the NavX on the robot, getting the angle which the
+                            robot is directed at may be either be from the getPitch(), getYaw(), or getRoll() method. After
+                            determing which method we want to use, we can create a method call getAngle() in our NavX 
+                            class which just returns the desired value. <br>
+                            For Example, if the NavX was on the robot in such a way that getYaw() was returning the angle 
+                            the robot would face after turning, our code in the NavX class would be:
+                            <br><br>
+                            <code>
+                                public double getAngle() { <br>
+                                    &nbsp&nbsp&nbsp&nbspreturn RobotMap.ahrs.getYaw(); <br>
+                                } <br><br>
+                            </code>
+                            Due to this, we don't have to remember which method to use and just call getAngle() on an instance of our
+                            NavX class. 
+                            <br> <br>
+                            One thing to note, the NavX may not be giving proper values at first try, before testing, be sure to
+                            follow the instructions 
+                            <a href = "https://pdocs.kauailabs.com/navx-mxp/guidance/gyroaccelcalibration/">here</a> under the 
+                            Factory Calibration instructions. 
+                        </p>
+                    </div>
+                    <div class = "col-md-4">
+                        <img class = "img-fluid" src = "images/NavX.jpg">
+                    </div>
+                </div>
+                <h3 class = "mt-5">Encoders</h3>
+                <div class = "row">
+                    <div class = "col-md-8">
+                        <p class = "info lead">
+                            For encoders, it is not totally necessary to create a seperate class
+                            specifally for them because they are generally attached to Talons and the
+                            WPI_TalonSRX class has methods to directly get each talon's encoder value. 
+                            For example, in RobotMap, to configure an encoder on the left front wheel, the
+                            code would be: <br><br>
+                            <code>lFrontDrive.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder,0,100);</code>
+                            <br><br>
+                            And then whenever the encoder value of that particular talon would be necessary, the code
+                            would be: <br><br>
+                            <code>RobotMap.lFrontDrive.getSelectedSensorPosition(0)</code>
+                            <br><br>
+                            Another important method is reseting the encoder value:<br><br>
+                            <code>RobotMap.lFrontDrive.setSelectedSensorPosition(0);</code>
+                        </p>
+                    </div>
+                    <div class = "col">
+                        <img class = "img-fluid" src = "images/Encoder.png">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <script src="/main.js"></script>
+</body>
+
+</html>

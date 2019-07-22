@@ -1,0 +1,66 @@
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+:root{
+    /*Use for variables (Color scheme)*/
+    --sky-blue: #51b2bb;
+}
+.body {
+    margin-top: 5em;
+}
+
+#main {
+   /* background-color: #5e767a; */
+}
+
+.topic:hover{
+    box-shadow: -4px 10px 12px 0px rgba(0,0,0,0.33);
+}
+#info-card{
+margin-top:25%;
+}
+
+.banner {
+    background-image: url(yoesmite.jpeg); 
+    background-repeat: no-repeat;
+    background-size: cover; 
+    background-position: center center;
+}
+
+.center-parallax 
+{
+    margin-top: 8em; 
+    background: rgba(0,0,0,.15);
+}
+
+.card-text {
+    height: 3em;
+}
+
+.info {
+    text-indent: 40px;
+     line-height: 2;
+}
+  .info div
+ {
+   text-indent: 0;
+ }
+
+.top-nav-collapse {
+    background: var(--sky-blue) !important;
+}
+
+#head-background {
+    background-color: #63d6e0 !important;
+}
+
+hr {
+    border : 1px solid var(--sky-blue);
+}
+
+.bottom {
+        position: relative;
+    bottom: 0;
+}

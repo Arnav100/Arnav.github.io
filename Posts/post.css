@@ -1,0 +1,38 @@
+
+.navbar{
+    background-color: var(--sky-blue);
+}
+
+
+.sidebar {
+    border-right: 1px dotted black
+}
+
+.list-title
+{
+    text-indent: 20px;
+}
+
+.title {
+    border-bottom: 3px solid var(--sky-blue);
+
+}
+
+li a {
+    text-decoration: none;
+    color: black;
+}
+
+.bigCode {
+    font-size: 12px;
+}
+
+
+.tab {
+    padding-left: 2.5em;
+}
+
+.border-bottom{
+    border-bottom: 5px dashed var(--sky-blue);
+}
+

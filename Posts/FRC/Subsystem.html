@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Personal Blog</title>
+
+    <!--
+    <link rel="shortcut icon" href="/icon.png">
+    <link rel="icon" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-5"">
+            <h1 class=" py-3 title">Subsystem Package</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5">
+                <h3>Purpose</h3>
+                <p class="info lead">
+                    In order to program a Robot, we look at smaller components working together
+                    for specific tasks and program them, these are called subsystems. Together, 
+                    by programming all the Robot's subsystems, we are able to control the whole
+                    Robot. This Subsystem package is meant to contain classes which extend
+                    the abstract Subsystem class.
+                </p>
+
+                <h3 class = "mt-5">Override Methods</h3>
+                <p class = "info lead">
+                    The only abstract method of the Subsystem class is 
+                    <code>public void initDefaultCommand()</code> The code for this method is to
+                    call <code>setDefaultCommand(/*new Command()*/)</code> This allows for a command
+                    to be continuously called by the Subsystem. For example, the Drive command
+                    for a Drive Train which runs off joystick control should be the defualt command
+                    of the Drive Train subsystem because it needs to be called continuously. Not 
+                    all subsystems need a defualt command, for example a gripper may not need to be
+                    doing anything continuously, so we can just leave the code for the
+                    initDefaultCommand method blank. 
+                </p>
+                <h3 class = "mt-5">Subsystem Examples</h3>
+                <p class = "info lead">
+                    There is a variety of possible subsystems which can be used on a robot, and
+                    there will always be more since each year's game is so different than previous games. 
+                    Susbsystems we have used in the past are the Drive Train, ball gripper, elevator, arm,
+                    dropwheel, jumpjacks (pistons in back which drop the wheels) and many more. In order
+                    to determine what should be a subsystem, it is best to communicate with the mechanical 
+                    team to determine which mechanisms should work together and which seperately. 
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <script src="/main.js"></script>
+</body>
+
+</html>
