@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Arnav's Blog</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-4"">
+            <h1 class=" py-3 title">Thesis Day 4</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5 ">
+                <h3>Previous Work</h3>
+                <p class="info lead">
+                   Up to this point I have been able to have Jonbot signal the arduino to start a lidar scan 
+                   and then have the arduino send back the data. I realized this data was not actually being fully sent
+                   as information was lost in the conversion to bytes that were sent to the robot. The goal for 
+                   today was to have the full data be sent to the robot and then to clean up the arduino's code.
+                </p>
+                <h3 class="mt-5">Progress</h3>
+                <p class="info lead">
+                    After thinkng through how to send the lidar readings to Jonbot without losing any information, I 
+                    realized after looking through the Arduino Wire library documentation, the .write() method could take
+                    in a string as a parameter. So I simply changed my code so that instead of creating a byte array with the 
+                    data, it would concatenate each value to a String and seperate each value with a space. When I tried compiling
+                    this code, I recieved an error trying to pass the String I created as the input for the .write() method. 
+                    After some research, I realized that in the Arduino C++, String and string are different classes. The String (uppercase) 
+                    class is a part of the built in Arduino library which behaves similarily as the String class in Java. The string (lowercase) 
+                    class is a part of C++ and is essentially a char array. The fix to my error was simple, I just created a storage 
+                    char array and used the Arduino String class method .toCharArray() to fill the storage array with the contents
+                    of the String and used the char array as the input to the .write() method. Then in Jonbot's code, 
+                    I edited the ArduinoRead command I had made to parse through the byte array to convert values seperated by a space char
+                    into ints, and then sent that array to be stored in the ArrayList of int arrays I was using previously. This 
+                    procedure worked and I was able to view the full readings of the lidar on Jonbot's Driverstation terminal. 
+                </p>
+                <code class="largeCodeFont">
+                    <div class = "tab">
+                        for(int i = lastIndexSent; i < lastIndexSent + 3 && i < 500; i ++) { <br>
+                            <div class =  "tab">
+                            send += String(fullSendData[i]) + " " ;<br>
+                            </div>
+                        } <br>
+                        lastIndexSent +=3; <br>
+                        char data[15]; <br>
+                        send.toCharArray(data, 15); <br>
+                        Wire.write(data); <br><br>
+                    </div>
+                </code>
+                <h3 class="mt-5">Arduino Side Improvements</h3>
+                <p class="info lead">
+                    I decided to improve upon the Aruino's code now that everything was working. The code was currently
+                    inputting the angle, distance, and strength values into the fullSendData array in the printCollectedData() method,
+                    taking each value from their storage array. Instead, I edited the procedure so that the data would would 
+                    be placed in the fullSendData directly within gatherSensorReading(), removing the need for the three seperate
+                    storage arrays. This fixed some performance and memory issues the arduino was experiencing, resulting in faster data collection. 
+                    I then rearranged the progression of states the arduino would go through so that the adjusting and verifying
+                    of the lidar settings would happen first, without any signal, and then the arduino would wait for Jonbot's signal. Lastly, 
+                    since the code was currently only collecting and sending one scan at a time to Jonbot, I changed the code so that once lastIndexSent 
+                    was greater than 500 (the array's length), the storage variables would reset and it would collect and send another scan. This process would stop
+                    only when the arudino recived a value of 2 from Jonbot. 
+                </p>
+                <h3 class="mt-5">Jonbot Side Improvements</h3>
+                <p class="info lead">
+                    Rather than using an int[] to store each scan point, I created a class called ScanPacket which stores 
+                    the angle, distance, and strength as private instance variables and has getter methods for each along with an 
+                    overriden toString() method and an isEmpty() method which returns true if all values are 0. Also, a class called 
+                    Scan was created which contains an ArrayList of ScanPackets. Since the arudino uses an array of length 500 to hold the 
+                    values of one scan to send to the robot, there exist some leftover indexes within this array which remain 0. Prior to creating 
+                    the Scan and ScanPacket class, I was ommiting int arrays containing only zeroes to be added to the storage ArrayList. The Scan
+                    class contains the method addScanPacket() which adds an empty (only containing zeores) packet if the previously added packet was not empty. 
+                    This empty packet marks the end of a 360 scan. Also, a new command was created which toggles the value to be sent to the Arduino
+                    as either 1 or 2. 1 signals the arduino to begin a lidar scan, 2 signals a stop. 
+                </p>
+                <h3 class="mt-5">Future Work</h3>
+                <p class="info lead">
+                    Now that Jonbot is recieving continous and multiple lidar scans, I want to create an interface to visualize the data. 
+                    After looking into how to create a custom Smart Dashboard application, I came across
+                     <a href = "https://github.com/FRCDashboard/FRCDashboard">Team 1418's FRC Dashboard application</a>, which allows anyone to 
+                    create their own dashboard by editing their code. I plan to use this to create my own interface. Since this may take some time, 
+                    another test I plan on performing is to use the lidar to determine the angle of the location farthest away from the robot, and have 
+                    it turn and move towards that area. With all this complete, I will plan out more use for the lidar's readings. 
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <!-- My JS Files-->
+    <script src="/main.js"></script>
+</body>
+
+</html>

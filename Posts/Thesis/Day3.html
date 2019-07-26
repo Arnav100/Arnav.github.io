@@ -42,25 +42,24 @@
                     My goal was to first send one full sensor reading at a time to Jonbot. I was able to 
                     start the scan easily with a push of trigger, causing the roborio to send a signal to the Arduino
                     which would then begin a scan, code which I wrote when I last worked with the devices. Currently,
-                    this process of collecting a scan would include having set the speed of the sensor and confirming 
-                    the correct speed, before actually beginning the scan. I knew I could remove this later, so that it would be
-                    done in the setup() method in the arduino code, but I did not want to right now, because I wanted
+                    this process of collecting a scan would include setting the speed of the sensor and confirming 
+                    the correct speed before actually beginning the scan. I knew I could change this to occur in the
+                    setup() method, but I wanted
                     to eliminate the variable of me interferring with correct code from being a factor in 
-                    something not working. With or without this speed confirmation, the I could not use 
-                    the I2C transaction() method to send the start message and recieve the response, because the
-                    response would take longer on the Arduino side. So instead, I created a command which in the
-                    execute() method would call the I2C read() method and would continuously run the command because 
-                    I made an Arduino subsystem in Jonbot's code, with the read command as the default command. I 
-                    made the communication between the Arduino and Jonbot so that if the first
+                    something not working. With or without this speed confirmation, 
+                    the I2C transaction() method could not be used to send the start message and recieve the response because the
+                    data collection would take longer on the Arduino side. So instead, I created a command which would 
+                    continuously run as the defualt command of the Arduino subsystem and repeatedly call the I2C read()
+                    method in execute(). If the first
                     value of the byte[] the read command recieved was less than 0, this would mean the Arduino had 
                     not collected the reading yet, and the read command would do nothing. 
                 </p>
                 <p class = "info lead">
                     For the Arduino code of sending the reading data, my first attempt was to edit the printCollectedData()
-                    method so that it would be onRequest() method to send data to Jonbot. The program was written to have states
+                    method so that it would be called by the onRequest() method to send data to Jonbot. The original program was written to have states
                     in order to determine which method should be running, so since the onRequest() method would get called over and 
                     over again (since the read command in Jonbot would be currently calling it continuously), I made it so that
-                    if the state was not STATE_REPORT_COLLECTED_DATA, then send a byte array only containing -1 to Jonbot. 
+                    if the state was not STATE_REPORT_COLLECTED_DATA, then a byte array only containing -1 would be sent to Jonbot. 
                     I then adjusted the code so that it printed the angle, distance, and signal strength values each from their respective
                     500 length byte arrays, it would store the values in a 1500 length byte array. Upon completion it would send that
                     byte array to Jonbot. I wasn't sure whether an array of that length could be sent over and sure enough
@@ -72,10 +71,10 @@
                 </p>
 
                 <p class = "info lead">
-                    Knowing I should send the data in groups of three, I thought it maybe best to send it directly from the gatherSensorReading
+                    Knowing I should send the data in groups of three, I thought it may be best to send it directly from the gatherSensorReading
                     method, rather than the printCollectedData() method. So I switched the gather method to be called by the onRequest()
-                    and inserted the same if statement based on the state in the arduino code, as described in the previous paragraph. I then 
-                    added code to store the values in a length 3  byte array and then send to Jonbot. When I tested this, I saw that only a few 
+                    and inserted the same arduino state if statement, as described in the previous paragraph. I then 
+                    added code to store the values in a length 3  byte array to then send to Jonbot. When I tested this, I saw that only a few 
                     scan points were sent over (Thinking back, this could have possibly happened due to errors on my part,
                     I will revist this when I clean up my code). Due to frustration, I decided to go about a slightly different
                     approach of sending this data. 
@@ -90,15 +89,16 @@
                     the next three values from the lastIndexSent value onwards to Jonbot (E.X. if lastIndexSent = 0, arduino would send
                     values in indexes 0, 1, 2, corresponding to angle, distance, and strength ). The lastIndexSent value would then 
                     get updated by having three added to it, and once it was greater than or equal to the value 500, the state of the
-                    arduino would then change. This worked! The values would get sent to the robot, and I stored an ArrayList of byte
-                    arrays and by creating a command, each scan point would get printed when I clicked a joystick button. Although, I
-                    realized that I had failed to remember by sending the values as scan point values as bytes
+                    arduino would then change. This worked! The values would get sent to the robot, and on the Robot's code
+                    I stored an ArrayList of byte
+                    arrays. I then created a command in which each scan point would get printed when I clicked a joystick button. When examining
+                    these vlaues, I realized that I had failed to remember by sending the scan point values as bytes
                      --- when they were originally ints --- I was losing the true values of that info. I would have to deal with this issue
                      next time I worked on the project.
                 </p>
                 <h3 class="mt-5">Future Work</h3>
                 <p class="info lead">
-                    I need to fix the loss of info from int to byte and I can do this by sending the info as Strings rather than bytes. 
+                    I need to fix the loss of info from int to byte and I can do this by sending the info as strings rather than bytes. 
                     After applying this fix, I will need to see if I can have a gui to display the data on the driver station. Then 
                     I can work to clean my arduino side code. After all this, I should have lidar readings being sent to Jonbot quickly 
                     and I can then begin to write logic for the robot to follow a path based on what is far and what is close to it. I
