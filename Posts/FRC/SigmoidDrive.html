@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-144553852-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-144553852-1');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Arnav's Blog</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class=" col-md-3"">
+            <h1 class=" py-3 title">SigmoidDrive</h1>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5">
+                <h3>Background</h3>
+                <div class = "row">
+                    <div class = "col-md-8">
+                        <p class="info lead">
+                            The procedure described in this post is to make a robot's drivetrain change in speed by following
+                            a sigmoid function. In previous years, we would simply pass in the the joystick value as the speed 
+                            for the drivetrain to move at. An issue that can occur through this is that if the driver is going full
+                            speed forward and then decides to suddenly go full speed backwards the sudden change can cause motors or gears
+                            to break or get damaged (Figure 1). Our first attempts to change this was to use PID loops to smooth the transition,
+                            but the issue we saw with PID loops is that we had no proper way to predict a graph of the change based on the PID values 
+                            prior to driving the robot,
+                            and the graphs we got after driving the robots did not display the speed change we hoped for (Figure 2 is similar to what we saw). 
+                            Our programming mentor suggested we program the drivetrain to follow a sigmoid curve and after viewing the curve, we saw that 
+                            it was the best solution to our problem (Figure 3).
+
+                        </p>
+                    </div>
+                    <div class = "col-md">
+                        
+ 
+                        <img src="images/Sigmoid Graph.png" class="img-fluid">
+                        <p class = "text-center">Sigmoid Graph (Figure 3)</p>
+                              
+                                        <img src="images/RoughPIDEstimate.png" class="img-fluid">
+                                        <p class="text-center">A Similar Graph To the PID changes (Figure 2)</p>
+                                  
+                    </div>
+                </div>
+                <div class = "row h-75">
+                    <div class = "col-md-6">
+                        <img src="images/quickChange.png" class="img-fluid">
+                        <p class = "text-center">Bad Sudden Change (Figure 1)</p>
+                    </div>
+      
+                </div>
+                <h3 class="mt-5">Programming</h3>
+                <h4 class="mt-5">Equations</h4>
+                <p class="info lead">
+                    For our sigmoid equation for speed which the robot has to follow, the range of that equation should be 
+                    from -1 to 1. The normal sigmoid function y =  1/(1 + e^(-x)) has a range of 0 to 1, so with adjustments to meet our need,
+                    we can use the equation y = 2 /(1 + e^(-x * A)) - 1, where A is a variable we can change to adjust the acceleration between
+                    the values -1 and 1.
+                </p>
+                <div class = "ml-5 my-4">
+                    <code class="largeCodeFont">
+                        private double sigmoid(double time, double a) {<br>
+                        <div class = "tab">
+                            return 2 / (1 + Math.pow(Math.E, -time * a)) - 1;<br>
+                        </div>
+                        }
+                    </code>
+                </div>
+                <p class="info lead">
+                    Another important equation for this procedure is the inverse of our sigmoid equation. This is needed because since the speed of
+                    the robot will be changing as it progresses along the sigmoid equation, the inverse equation can let us know the X value (time) 
+                    the current speed was just at. To determine the inverse of any equation, the y and x values should be switched and then simplifed
+                    to the form y = ___ . The inverse of the sigmoid equation is, y = -ln((2 / (x + 1)) - 1) / A
+                </p>
+                <div class="ml-5 my-4">
+                    <code class="largeCodeFont">
+                        private double inverseSig(double speed, double a) {<br>
+                            <div class = "tab">
+                            return -Math.log(2 / (speed + 1) - 1) / a;<br>
+                            </div>
+                        }
+                    </code>
+                </div>
+                <h4 class="mt-5">Procedure</h4>
+                <p class="info lead">
+                    The procedure our team created relies on the fact that the roborio loops the code roughly every 200 milliseconds. So using this fact
+                    we can have the robot speed progress along the sigmoid equation to the speed inputted by the joystick. 
+                </p>
+                <h5 class="mt-5">Instance Variables</h5>
+                <p class = "info lead">
+                    Two int arrays of length 2 are kept as instance variables within the drivetrain class to keep track of the robot's speeds. 
+                    The reason each of these arrays are of length 2 is because the left and right side of the robot move at different speeds in order
+                    to make turns. If necessary, you could have each wheel move at different speeds and have the length of each array be equal to the number
+                    of wheels, but that would be a rare scenario. 
+                    These arrays are labeled desiredSpeeds and currentSpeeds, the former holds the speeds being inputted by the joysticks (the desired values),
+                    and the latter holds the real speeds of the drivetrain as it progresses through the equation.
+                </p>
+                <h4 class="mt-5">Code</h4>
+                <p class = "info lead">
+                    The following code is for the method which progresses the speed of the robot along the sigmoid equation, the comments
+                    explain what each part does. 
+                </p>
+                <div style = "background-color: rgb(128,128,128, 0.15)" class = "pl-5 py-4 rounded">
+                    <code>
+                        private double getSideSigValue(double speed, boolean isRight, double a){<br><br>
+                            <div class = "tab">
+                                <div class = "comment">
+                                //Determines the index of the array, left - 0, right - 1<br>
+                                </div>
+                                int index = 0;<br>
+                                if(isRight)<br>
+                                <div class = "tab">
+                                    index = 1;<br><br>
+                                </div>
+                                <div class="comment">
+                                //The sigmoid function can never reach 1 or -1, so this caps the input<br>
+                                </div>
+                                if(speed > 0.99 || speed < -0.99)<br>
+                                <div class="tab">
+                                    speed = speed * 0.99;<br><br>
+                                </div>
+                                
+                                <div class="comment">
+                                //Records the desired speed, and if that has been roughly reached by<br>
+                                //the function, return the desired speed. <br>
+                                </div>
+                                desiredSpeeds[index] = speed;<br>
+                                if (Math.abs(desiredSpeeds[index] - currentSpeeds[index]) < 0.01) <br>
+                                <div class="tab">
+                                    return desiredSpeeds[index];<br>
+                                </div>
+                                 <br><br>
+                                <div class="comment">
+                                //Calculates the current x value in the function<br>
+                                </div>
+                                double startTime = inverseSig(currentSpeeds[index], a);<br><br>
+
+                                <div class="comment">
+                                //Used to get the next value the robot should use<br>
+                                </div>
+                                double cycleTime = 0.02;<br>
+                               
+                                if (desiredSpeeds[index] < currentSpeeds[index])<br>
+                                <div class="tab">
+                                    cycleTime = -cycleTime;<br><br>
+                                </div>
+
+                                return sigmoid(startTime + cycleTime, a);<br>
+                            </div>
+                            }
+                    </code>
+                </div>
+                <p class = "info lead mt-3">
+                    The remaining methods simply call the getSideSigValue() method and apply the returned values.
+                </p>
+                <div style = "background-color: rgb(128,128,128, 0.15)" class = "pl-5 py-4 rounded">
+                    <code>
+                        public void sigmoidDrive() {<br>
+                            <div class = "tab">
+                            sigmoidMove(Robot.oi.j0.getY(), Robot.oi.j1.getY());<br>
+                            </div>
+                        }<br><br>
+
+                        public void sigmoidMove(double leftSpeed, double rightSpeed) {<br>
+                            <div class = "tab">
+                                sigmoidMove(leftSpeed, rightSpeed, Constants.SIGMOID_A);<br>
+                            </div>
+                        }<br><br>
+
+                        public void sigmoidMove(double leftSpeed, double rightSpeed, double a) { <br>
+                            <div class="tab">
+                                leftSpeed = getSideSigValue(leftSpeed, false, a);<br>
+                                rightSpeed = getSideSigValue(rightSpeed, true, a);<br>
+                                move(leftSpeed, rightSpeed);<br>
+                            </div>
+                        }<br><br>
+
+                        public void move(double leftSpeed, double rightSpeed) { <br>
+                            <div class = "tab">
+                                RobotMap.driveBase.tankDrive(leftSpeed, rightSpeed);<br>
+                                currentSpeeds[0] = leftSpeed;<br>
+                                currentSpeeds[1] = rightSpeed;<br>
+                            </div>
+                        }
+
+                    </code>
+                </div>
+                <p class="info lead">
+                    This drive method is used the same way as an ordinary drivetrain drive method, it has to be called in the execute()
+                    method of a Command class and that Command should be the defualt command of the DriveTrain class. This way, this code 
+                    will be repeatedly called and the transition will be smooth.
+                </p>
+                <h4 class="mt-5">The A Value</h4>
+                <p class = "info lead">
+                    As stated earlier, the A value can be set to any number to increase the acceleration between the values -1 and 1. For testing this
+                    code to make sure it performs as expected, I would suggest using A values between 2 - 5, because the wheel changing speed to match the joystick
+                    values will be most visual. For our team, we let our mechanical mentor adjust the A value himself and he settled on the value of 25. With this high value,
+                    the wheel speed adjustment is quick and barely noticiable but still there, thereby stopping any motors from breaking from sudden changes. I would
+                    not reccommend using very high values because then it will take the robot too long to perform the calculations for the equations. For gameplay,
+                    our value of 25 worked very well, and we used lower values to have the robot accelerate and decelerate during autonomous. A benefit to using this
+                    procedure rather than PID loops is that you can graph the sigmoid equation, using sites like <a target="_blank" href = "https://www.desmos.com/calculator/f6n5lffiwd">Desmos</a>,
+                    and find what kind of acceleration you would like. 
+                </p>
+                <h3 class="mt-5">Future Work</h3>
+                <p class = "info lead">
+                    Our use of this procedure resulted in no gear breaking problems from sudden changes
+                    during the 2019 season, so we can label this as a success. With this procedure, not just a sigmoid equation but
+                    <b>any function can be used</b> to control the robot speed. As long as the inverse function can be written, the sigmoid function 
+                    can be replaced. 
+
+                </p>
+                <p class="info lead">
+                    Initially this year, we wanted to create
+                    a 100% custom drivetrain class, without using the FRC provided DifferentialDrive library. Our reasoning behind
+                    this was so that we could have each one of our six wheels move independent of any other and
+                    have traction control if one wheel spun out. We didn't end up doing this because when trying to use even a normal drive
+                    movement
+                    by sending power to the wheels, we would get slight jittery movement, regardless of our attempts. Also, the traction
+                    control wasn't
+                    viewed as a necessary ability by our programming mentor, so we decided to pick up that idea another time. Possibly in
+                    the future
+                    we will go back and try again to do these things.
+                </p>
+            </div>
+       
+        </div>
+
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <script src="/main.js"></script>
+</body>
+
+</html>
