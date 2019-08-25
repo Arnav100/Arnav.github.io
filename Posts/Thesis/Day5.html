@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-144553852-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-144553852-1');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Arnav's Blog</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/css/mdb.min.css" rel="stylesheet">
+    <!-- My CSS Files-->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/Posts/post.css">
+</head>
+
+<body>
+    <div id="header"></div>
+    <div class="container body">
+        <div class="col-md-10">
+            <div class = "row py-3 justify-content-between">
+                <h1 class="col-md-4 title">Thesis Day 5</h1> 
+                <h1 class = "col-md-5 py-2 bg-success text-center text-white border border-warning rounded">Successful Day!</h1>
+            </div>
+        </div>
+        <div class="ml-3 mt-3 flex justify-content-center">
+
+            <div class="col-md-10 mt-5 ">
+                <h3>Previous Work</h3>
+                <p class="info lead">
+                    I have gotten the arduino to send the lidar data points to Jonbot and for Jonbot to store and print the data 
+                    to the terminal. Today's plan was to display this data. 
+                </p>
+                <h3 class="mt-5">Arduino Side Code</h3>
+                <p class="info lead">
+                    As I was viewing the data printed by Jonbot, I saw some inaccurate values printed. I attempted to make adjustments 
+                    to the arduino code, which led to more issues for data transmission, so I thought it would be best to simply restart 
+                    the arduino code, now that I have a better understanding of how it should work. I decided rather than create a seperate method,
+                    I could use the printCollectedData() method as the .onRequest() method, since it already changed the data into a string, which it would print. 
+                </p>
+                <code class="largeCodeFont">
+                    void printCollectedData() {<br>
+                        <div class = "tab">
+                        //Don't send anything if it is not in the correct state<br>
+                        if(currentState != STATE_REPORT_COLLECTED_DATA) {<br>
+                            <div class = "tab">
+                            byte dontSend[1];<br>
+                            dontSend[0] = -1;<br>
+                            Wire.write(dontSend, 1);<br>
+                            return;<br>
+                            </div>
+                        }<br><br>
+
+                        int indexOfFirstSyncReading = 0;<br>
+                        // don't print the trailing readings from the first partial scan<br>
+                        while (!syncValues[indexOfFirstSyncReading]) {<br>
+                            <div class = "tab">
+                            indexOfFirstSyncReading++;<br>
+                            </div>
+                        }<br><br>
+                        // print the readings for all the complete scans<br>
+                        int i = lastIndex + indexOfFirstSyncReading;<br>
+                        String s = String(angles[i], 3) + " " + String(distances[i]) + " " + String(signalStrengths[i]) + " ";<br>
+                        Serial.println(s);<br><br>
+
+                        //Send the data to Jonbot<br>
+                        char data[20];<br>
+                        s.toCharArray(data, 20);<br>
+                        Wire.write(data);<br><br>
+
+                        //Reset values if everything has been printed<br>
+                        lastIndex ++;<br>
+                        if(lastIndex + indexOfFirstSyncReading >= sampleCount) {<br>
+                            <div class = "tab">
+                            currentState = STATE_BEGIN_DATA_ACQUISITION;<br>
+                            scanCount = 0;<br>
+                            sampleCount = 0;<br>
+                            waitPrinted = false;<br>
+                            </div>
+                        }<br>
+                    </div>
+                }<br><br>
+                </code>
+                <p class = "info lead">
+                    With this new code, all data which was sent was correct and sent smoothly. I also adjusted the progression of states, so that
+                    adjusting device settings and verifying would happen on start up, without any message from Jonbot. Also, I adjusted the code
+                    so that the states would loop through collection and printing continuously, unless a value of 2 was sent from Jonbot. 
+                </p>
+                <h3 class="mt-5">Displaying the Data</h3>
+                <div class = "row">
+                    <div class = "col-md-7">
+                        <p class="info lead">
+                            I downloaded <a href="https://github.com/FRCDashboard/FRCDashboard">Team 1418's FRC Dashboard application</a> and 
+                            edited for this project so that I could have a display of the 2 dimensional map created by the data from the lidar.
+                            I will go over the code for that in a seperate post. The data is sent from the robot to the dashboard via networktables.
+                            Originally, I sent the full array of datapoints at once to the dashboard and updated those points whenever a new full scan was 
+                            sent to Jonbot. To do this, I created three table entries, distances, angles, and strengths, and when the dashboard detected a change
+                            in the distances table it would retrieve the data from the other two and add the points to the map. <b>This worked!</b> I was able to
+                            create an updating 2 dimensional map of the environment. I saw that the updates were very slow, so I changed the code so that as Jonbot recieved each 
+                            data point it would send that point immediatley to the dashboard which would then add it to the map. 
+
+                        </p>
+                    </div>
+                    <div class = "col-md">
+                        <img src = "images/First2dMap.jpg" class = "img-fluid">
+                        <p class = "text-center">First Updating 2D Map</p>
+                    </div>
+                </div>
+                <h3 class="mt-5">Future Work</h3>
+                <p class="info lead">
+                    With the data transmission to the dashboard, I kept the three seperate table entries even though I was only sending one point,
+                    I should go back and change it so only one array of size 3, holding that point's distance, angle, and strength sends. Also, after 
+                    researching SLAM (Simultaneous Localization And Mapping) for lidar maps, a seperate idea I have is to create a map of the room that 
+                    gets further built as the robot travels. But to do this would require using a third party graphing tool on the dashboard to have an
+                    expanding grid, and using the robot's encoders and gyroscope. The idea I have to achieve a simple version of this
+                    map building is to keep track of the robots
+                    movement via a vector and then apply that vector to the cartesian coordinates of all collected datapoints, in order to have a map 
+                    of the area with the robot's initial position as (0,0). This is just a side project though, the original plan is to create a path 
+                    for the robot (I'm think walls of cardboard for right now) and have it navigate through it all on its own using the lidar. 
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <hr class="w-75 mt-5">
+    <p class="text-center py-4">© All Rights Reserved.</p>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.16/js/mdb.min.js"></script>
+    <!-- My JS Files-->
+    <script src="/main.js"></script>
+</body>
+
+</html>
